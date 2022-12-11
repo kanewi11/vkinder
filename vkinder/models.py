@@ -11,7 +11,7 @@ class User(Base):
     vk_user_id = Column(Integer, nullable=False)
     sex = Column(Integer, nullable=False)
     birthday = Column(DateTime, nullable=False)
-    city = Column(Integer, nullable=False)
+    city = Column(String, nullable=False)
     family_status_id = Column(Integer, nullable=False)
 
 

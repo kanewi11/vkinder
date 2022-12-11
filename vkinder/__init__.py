@@ -10,14 +10,11 @@ __author__ = 'kanewi11'
 __email__ = 'blacknekit11@gmail.com'
 
 from vkbottle.bot import Bot
-from vkbottle.user import User
-
 
 from .models import create_tables
-from .config import state_dispenser, labeler
-from .handlers import chat_bot_labeler, chat_user_labeler
+from .handlers import chat_bot_labeler
 from .states import states_bot_labeler, state_dispenser
-from config import COMMUNITY_TOKEN
+from .config import state_dispenser, labeler, COMMUNITY_TOKEN
 
 
 labeler.load(chat_bot_labeler)

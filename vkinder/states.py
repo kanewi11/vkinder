@@ -1,11 +1,10 @@
 from vkbottle import CtxStorage
 from vkbottle.bot import Message
 from vkbottle.bot import BotLabeler
-from vkbottle import BaseStateGroup, BuiltinStateDispenser
+from vkbottle import BaseStateGroup
 
 from .utils import get_age, reversed_sex_table, sex_table, relation_table
-from .config import api, state_dispenser
-from config import AGE_FROM, AGE_TO
+from .config import api, state_dispenser, engine, AGE_FROM, AGE_TO
 
 
 states_bot_labeler = BotLabeler()
