@@ -7,7 +7,7 @@
 
 user_bot.py
 test.py
-
+*.db
 # User-specific stuff
 .idea/
 .idea/**/workspace.xml

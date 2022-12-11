@@ -1,11 +1,14 @@
-from vkbottle import BaseStateGroup
-from vkbottle.bot import Message
 from vkbottle import CtxStorage
+from vkbottle.bot import Message
+from vkbottle.bot import BotLabeler
+from vkbottle import BaseStateGroup, BuiltinStateDispenser
 
-from . import bot, user
 from .utils import get_age, reversed_sex_table, sex_table, relation_table
+from .config import api, state_dispenser
 from config import AGE_FROM, AGE_TO
 
+
+states_bot_labeler = BotLabeler()
 
 ctx = CtxStorage()
 
@@ -16,7 +19,7 @@ class UserInfoState(BaseStateGroup):
     CITY = 2
 
 
-@bot.on.private_message(state=UserInfoState.AGE)
+@states_bot_labeler.private_message(state=UserInfoState.AGE)
 async def age_handler(message: Message):
     text = message.text.strip()
     if not text.isdigit():
@@ -27,26 +30,26 @@ async def age_handler(message: Message):
             ctx.set('age', age)
         else:
             await message.answer(f'🔞 Тут возрастное ограничение от {AGE_FROM} до {AGE_TO} лет.\n')
-    await bot.state_dispenser.delete(message.peer_id)
+    await state_dispenser.delete(message.peer_id)
     await user_data_handler(message)
 
 
-@bot.on.private_message(state=UserInfoState.CITY)
+@states_bot_labeler.private_message(state=UserInfoState.CITY)
 async def city_handler(message: Message):
     text = message.text.strip()
-    cities = await user.api.database.get_cities(country_id=1, q=text)
+    cities = await api.database.get_cities(country_id=1, q=text)
     if cities.items:
         ctx.set('city', text)
     else:
         await message.answer('🌁 Я не знаю такого города, попробуйте заново...')
 
-    await bot.state_dispenser.delete(message.peer_id)
+    await state_dispenser.delete(message.peer_id)
     await user_data_handler(message)
 
 
 async def user_data_handler(message: Message):
     user_id = message.from_id
-    users = await user.api.users.get(user_id, fields=['sex', 'city', 'bdate', 'relation'])
+    users = await api.users.get(user_id, fields=['sex', 'city', 'bdate', 'relation'])
     user_info = users[0]
 
     age = ctx.get('age')
@@ -62,12 +65,12 @@ async def user_data_handler(message: Message):
             ctx.set('age', get_age(bod))
 
     if age is None:
-        await bot.state_dispenser.set(message.peer_id, UserInfoState.AGE)
+        await state_dispenser.set(message.peer_id, UserInfoState.AGE)
         await message.answer('🔢 Введите свой возраст.')
         return
 
     if city is None:
-        await bot.state_dispenser.set(message.peer_id, UserInfoState.CITY)
+        await state_dispenser.set(message.peer_id, UserInfoState.CITY)
         await message.answer('🌃 Введите свой город.')
         return
 

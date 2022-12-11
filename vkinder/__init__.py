@@ -9,23 +9,21 @@
 __author__ = 'kanewi11'
 __email__ = 'blacknekit11@gmail.com'
 
-import logging
-
 from vkbottle.bot import Bot
-from vkbottle.modules import logger
 from vkbottle.user import User
 
-from config import COMMUNITY_TOKEN, USER_TOKEN
+
+from .models import create_tables
+from .config import state_dispenser, labeler
+from .handlers import chat_bot_labeler, chat_user_labeler
+from .states import states_bot_labeler, state_dispenser
+from config import COMMUNITY_TOKEN
 
 
-logging.basicConfig(level=logging.DEBUG)
-logger.setLevel(logging.DEBUG)
+labeler.load(chat_bot_labeler)
+labeler.load(states_bot_labeler)
 
-
-bot = Bot(token=COMMUNITY_TOKEN)
-user = User(token=USER_TOKEN)
-
-from .handlers import *
+bot = Bot(token=COMMUNITY_TOKEN, labeler=labeler, state_dispenser=state_dispenser)
 
 
 def run():
