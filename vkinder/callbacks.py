@@ -10,7 +10,7 @@ from .config import api, SEARCH_USERS_PARAMS, GET_PHOTOS_PARAMS, SEARCH_USERS_FI
 from .base import get_user, is_viewed, add_view, add_like
 from .messages import not_found, end_search
 from .keyboards import get_carousel_keyboard
-from .utils import get_age
+from .utils import get_age, reversed_sex_table
 from .base import User
 
 
@@ -50,7 +50,7 @@ async def search_users(user: User) -> List[UsersUserFull]:
         return ctx_users
 
     params = {
-        'sex': user.sex_id,
+        'sex': reversed_sex_table[user.sex_id],
         'hometown': user.city,
         'age_from': user.age,
         'age_to': user.age,
