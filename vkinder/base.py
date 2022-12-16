@@ -10,6 +10,7 @@ from .config import DSN
 Base = declarative_base()
 engine = create_engine(DSN, echo=False)
 Session = sessionmaker(bind=engine)
+logger = logging.getLogger('vkinder')
 
 
 class User(Base):
@@ -74,7 +75,7 @@ def session_add(cls: object) -> None:
         session.commit()
     except exc.SQLAlchemyError as error:
         session.rollback()
-        logging.critical(error.__str__())
+        logger.critical(error.__str__())
     finally:
         session.close()
 
