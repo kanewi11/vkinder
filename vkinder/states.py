@@ -3,12 +3,14 @@ from vkbottle.bot import Message
 from vkbottle.bot import BotLabeler
 from vkbottle import BaseStateGroup
 
-from ..utils import get_age, reversed_sex_table, sex_table, relation_table, is_there_a_user, add_new_user
-from ..messages import send_age, send_city, search_options, unfamiliar_city, send_only_numbers, age_limit
-from ..config import api, state_dispenser, AGE_FROM, AGE_TO, USER_DATA_FIELDS
+from .messages import send_age, send_city, search_options, unfamiliar_city, send_only_numbers, age_limit, searching
+from .config import api, state_dispenser, AGE_FROM, AGE_TO, USER_DATA_FIELDS
+from .utils import get_age, reversed_sex_table, sex_table, relation_table
+from .base import is_there_a_user, add_new_user
+from .callbacks import start_search_users
 
 
-user_data_labeler = BotLabeler()
+states_labeler = BotLabeler()
 ctx = CtxStorage()
 
 
@@ -18,7 +20,7 @@ class UserInfoState(BaseStateGroup):
     CITY = 2
 
 
-@user_data_labeler.private_message(state=UserInfoState.AGE)
+@states_labeler.private_message(state=UserInfoState.AGE)
 async def age_handler(message: Message):
     text = message.text.strip()
     if not text.isdigit():
@@ -33,7 +35,7 @@ async def age_handler(message: Message):
     await data_state_handler(message)
 
 
-@user_data_labeler.private_message(state=UserInfoState.CITY)
+@states_labeler.private_message(state=UserInfoState.CITY)
 async def city_handler(message: Message):
     text = message.text.strip()
     cities = await api.database.get_cities(country_id=1, q=text)
@@ -46,12 +48,7 @@ async def city_handler(message: Message):
     await data_state_handler(message)
 
 
-async def data_state_handler(message: Message):
-    """Checking user data and querying it for search"""
-    user_id = message.from_id
-    if is_there_a_user(user_id):
-        return
-
+async def check_user_data(message: Message, user_id: int) -> bool:
     users = await api.users.get(user_id, fields=USER_DATA_FIELDS)
     user_info = users[0]
 
@@ -70,12 +67,12 @@ async def data_state_handler(message: Message):
     if not age:
         await message.answer(send_age)
         await state_dispenser.set(message.peer_id, UserInfoState.AGE)
-        return
+        return False
 
     if not city:
         await message.answer(send_city)
         await state_dispenser.set(message.peer_id, UserInfoState.CITY)
-        return
+        return False
 
     relation_object = user_info.relation
     relation_id = relation_object.value
@@ -85,9 +82,20 @@ async def data_state_handler(message: Message):
     sex_id = sex_object.value
     reversed_sex_id = reversed_sex_table[sex_id]
     sex_text = sex_table[reversed_sex_id]
-
     add_new_user(user_id, age, sex_id, relation_id, city)
-    await message.answer(search_options.format(city, age, sex_text, relation_text))
-
     ctx.delete('age')
     ctx.delete('city')
+    await message.answer(search_options.format(city, age, sex_text, relation_text))
+    return True
+
+
+async def data_state_handler(message: Message):
+    """Checking user data and querying it for search"""
+    user_id = message.from_id
+    if not is_there_a_user(user_id):
+        have_all_data = await check_user_data(message, user_id)
+        if not have_all_data:
+            return
+
+    await message.answer(searching)
+    await start_search_users(message)

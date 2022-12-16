@@ -1,12 +1,9 @@
 import os
 import logging
 
-import sqlalchemy
 from vkbottle import API, BuiltinStateDispenser
 from vkbottle.bot import BotLabeler
 from vkbottle.modules import logger
-
-from .models import create_tables
 
 
 COMMUNITY_TOKEN = os.getenv('COMMUNITY_TOKEN')
@@ -20,7 +17,12 @@ DSN = 'sqlite:///vkinder.db'
 AGE_FROM = 16
 AGE_TO = 50
 
-USER_DATA_FIELDS = ['sex', 'city', 'bdate', 'relation']
+USER_DATA_FIELDS = [
+    'sex',
+    'city',
+    'bdate',
+    'relation',
+]
 SEARCH_USERS_PARAMS = {
     'offset': 0,
     'count': 1000,
@@ -29,20 +31,25 @@ SEARCH_USERS_PARAMS = {
     'age_from': None,
     'age_to': None,
     'has_photo': 1,
-    'status': None
+    'status': None,
 }
-SEARCH_USERS_FIELDS = ['is_friend', 'can_write_private_message']
+SEARCH_USERS_FIELDS = [
+    'is_friend',
+    'is_closed',
+    'blacklisted',
+    'blacklisted_by_me',
+    'can_write_private_message',
+    'bdate',
+    'verified',
+]
 GET_PHOTOS_PARAMS = {
     'count': 3,
     'skip_hidden': 1
 }
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger.setLevel(logging.WARNING)
 
-engine = sqlalchemy.create_engine(DSN)
-create_tables(engine)
-
 api = API(USER_TOKEN)
-labeler = BotLabeler()
+base_labeler = BotLabeler()
 state_dispenser = BuiltinStateDispenser()

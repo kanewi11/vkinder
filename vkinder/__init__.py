@@ -8,22 +8,25 @@
 
 __author__ = 'kanewi11'
 __email__ = 'blacknekit11@gmail.com'
+__all__ = ['run']
 
 from vkbottle.bot import Bot
 
-from .models import create_tables
-from .handlers import chat_bot_labeler
-from .states.user_data import user_data_labeler
-from .states.search import search_labeler
-from .config import state_dispenser, labeler, COMMUNITY_TOKEN
+from .base import create_tables
+from .chat import chat_labeler
+from .callbacks import callback_labeler
+from .states import states_labeler
+from .callbacks import callback_labeler
+from .config import state_dispenser, base_labeler, COMMUNITY_TOKEN
 
 
-labeler.load(chat_bot_labeler)
-labeler.load(user_data_labeler)
-labeler.load(search_labeler)
+labelers = [chat_labeler, states_labeler, callback_labeler, callback_labeler]
+for labeler in labelers:
+    base_labeler.load(labeler)
 
-bot = Bot(token=COMMUNITY_TOKEN, labeler=labeler, state_dispenser=state_dispenser)
+bot = Bot(token=COMMUNITY_TOKEN, labeler=base_labeler, state_dispenser=state_dispenser)
 
 
 def run():
+    create_tables()
     bot.run_forever()
