@@ -1,5 +1,7 @@
-## VKinder diploma of "Netology"
-#### Dating bot "analogue of Tinder"
+## VKinder diploma of `Netology`
+
+
+#### Dating bot `analogue of Tinder`
 ### To run the bot you need a `user token` and your `community token`.
 
 You must add these tokens to the environment variables:
